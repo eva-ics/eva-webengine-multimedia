@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/eva-ics/eva-webengine-multimedia"
   },
-  "main": "./dist/webengine-multimedia.cjs",
+  "main": "./dist/webengine-multimedia.umd.js",
   "module": "./dist/webengine-multimedia.es.js",
   "files": [
     "dist"
@@ -21,7 +21,7 @@
   "exports": {
     ".": {
       "import": "./dist/webengine-multimedia.es.js",
-      "require": "./dist/webengine-multimedia.cjs"
+      "require": "./dist/webengine-multimedia.umd.js"
     }
   },
   "keywords": [
