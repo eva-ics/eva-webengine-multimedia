@@ -1,0 +1,49 @@
+{
+  "name": "@eva-ics/webengine-multimedia",
+  "version": "0.1.0",
+  "description": "EVA ICS HMI Web Engine Multimedia",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc src/*.ts -t es6 --moduleResolution bundler --declaration --lib es2020,dom --downlevelIteration --emitDeclarationOnly --declarationDir dist/ && mv dist/lib.d.ts dist/webengine-multimedia.es.d.ts",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eva-ics/eva-webengine-multimedia"
+  },
+  "main": "./dist/webengine-multimedia.cjs",
+  "module": "./dist/webengine-multimedia.es.js",
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/webengine-multimedia.es.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/webengine-multimedia.es.js",
+      "require": "./dist/webengine-multimedia.cjs"
+    }
+  },
+  "keywords": [
+    "video",
+    "audio",
+    "browser",
+    "framework",
+    "evaics",
+    "hmi",
+    "eva-ics"
+  ],
+  "author": "Bohemia Automation",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/eva-ics/eva-webengine-multimedia/issues"
+  },
+  "homepage": "https://www.eva-ics.com/",
+  "devDependencies": {
+    "typescript": "^5.1.3",
+    "vite": "^6.3.5"
+  },
+  "peerDependencies": {
+    "@eva-ics/webengine": "^0.9.12"
+  }
+}
