@@ -1,4 +1,4 @@
-const eva_webengine_multimedia_version = "0.1.0";
+const eva_webengine_multimedia_version = "0.1.1";
 
 import { Eva, EvaErrorKind, EvaError } from "@eva-ics/webengine";
 
