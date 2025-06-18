@@ -8,6 +8,9 @@ export const get_engine = (): Eva | null => {
   return eva;
 };
 
+/**
+ * Sets the default WebEngine for multimedia operations.
+ */
 export const set_engine = (engine: Eva) => {
   eva = engine;
   (eva as any).we_multimedia_version = eva_webengine_multimedia_version;

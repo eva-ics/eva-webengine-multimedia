@@ -7,3 +7,8 @@ bump:
 
 pub:
 	rci x eva.webengine-multimedia
+
+doc:
+  rm -rf docs
+  typedoc --plugin typedoc-plugin-missing-exports --skipErrorChecking --cacheBust
+  cd docs && gsutil -m cp -a public-read -r . gs://pub.bma.ai/dev/docs/eva-webengine-multimedia/
