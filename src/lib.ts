@@ -1,4 +1,4 @@
-const eva_webengine_multimedia_version = "0.1.1";
+const eva_webengine_multimedia_version = "0.1.2";
 
 import { Eva, EvaErrorKind, EvaError } from "@eva-ics/webengine";
 
@@ -278,8 +278,14 @@ export class EvaVideoDecoder {
     this.first_key_received = false;
     this.fallback = false;
   }
-  decode(data: ArrayBuffer): boolean {
-    const frame = new EvaVideoFrame(data);
+  decode(data: ArrayBuffer, timestamp = 0): boolean {
+    let frame;
+    try {
+      frame = new EvaVideoFrame(data);
+    } catch (error: any) {
+      this.onError(error);
+      return false;
+    }
     if (!frame.format) {
       throw new EvaError(
         EvaErrorKind.INVALID_DATA,
@@ -316,7 +322,7 @@ export class EvaVideoDecoder {
     }
     const chunk = new EncodedVideoChunk({
       type: frame.isKey() ? "key" : "delta",
-      timestamp: 0, // Timestamp is not used in this example
+      timestamp,
       data: frame.data
     });
     try {
