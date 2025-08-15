@@ -1,4 +1,4 @@
-const eva_webengine_multimedia_version = "0.1.2";
+const eva_webengine_multimedia_version = "0.1.3";
 
 import { Eva, EvaErrorKind, EvaError } from "@eva-ics/webengine";
 
@@ -16,7 +16,7 @@ export const set_engine = (engine: Eva) => {
   (eva as any).we_multimedia_version = eva_webengine_multimedia_version;
 };
 
-export enum EvaLivePlayerAutoSize {
+export enum EvaPlayerAutoSize {
   None = "none",
   KeepWidth = "keep-width",
   KeepHeight = "keep-height",
@@ -25,7 +25,7 @@ export enum EvaLivePlayerAutoSize {
 
 export interface EvaLivePlayerParameters {
   canvas: HTMLCanvasElement;
-  autoSize?: EvaLivePlayerAutoSize;
+  autoSize?: EvaPlayerAutoSize;
   name: string;
   engine?: Eva;
   onError?: (error: EvaError) => void;
@@ -47,7 +47,7 @@ export class EvaLivePlayer {
   name: string;
   decoder: EvaVideoDecoder;
   engine: Eva;
-  autoSize: EvaLivePlayerAutoSize;
+  autoSize: EvaPlayerAutoSize;
   canvas: HTMLCanvasElement;
   onFrame?: () => void;
   onError?: (error: EvaError) => void;
@@ -64,7 +64,7 @@ export class EvaLivePlayer {
       throw new Error("EVA ICS WebEngine not set");
     }
     this.engine = eva_engine;
-    this.autoSize = params.autoSize ?? EvaLivePlayerAutoSize.None;
+    this.autoSize = params.autoSize ?? EvaPlayerAutoSize.None;
     this.onFrame = params.onFrame;
     this.onError = params.onError;
     this.onEOS = params.onEOS;
@@ -86,17 +86,17 @@ export class EvaLivePlayer {
     const autoSize = this.autoSize;
     this.decoder.onChange = (info) => {
       switch (autoSize) {
-        case EvaLivePlayerAutoSize.KeepWidth:
+        case EvaPlayerAutoSize.KeepWidth:
           this.canvas.height = (this.canvas.width * info.height) / info.width;
           break;
-        case EvaLivePlayerAutoSize.KeepHeight:
+        case EvaPlayerAutoSize.KeepHeight:
           this.canvas.width = (this.canvas.height * info.width) / info.height;
           break;
-        case EvaLivePlayerAutoSize.Resize:
+        case EvaPlayerAutoSize.Resize:
           this.canvas.width = info.width;
           this.canvas.height = info.height;
           break;
-        case EvaLivePlayerAutoSize.None:
+        case EvaPlayerAutoSize.None:
           // Do nothing
           break;
       }
