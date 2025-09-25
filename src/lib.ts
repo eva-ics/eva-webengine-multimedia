@@ -1,4 +1,4 @@
-const eva_webengine_multimedia_version = "0.1.5";
+const eva_webengine_multimedia_version = "0.1.6";
 
 import {
   Eva,
@@ -787,7 +787,7 @@ export class EvaVideoFrame {
   format?: VideoCodec;
   width: number;
   height: number;
-  metadata: number;
+  flags: number;
   data: Uint8Array;
   constructor(data: ArrayBuffer) {
     const magic = new Uint8Array(data, 0, 3);
@@ -829,11 +829,11 @@ export class EvaVideoFrame {
     }
     this.width = (header[3] << 8) | header[2];
     this.height = (header[5] << 8) | header[4];
-    this.metadata = header[6];
+    this.flags = header[6];
     this.data = new Uint8Array(data, 10);
   }
   isKey() {
-    return (this.metadata & 0x01) !== 0;
+    return (this.flags & 0x01) !== 0;
   }
 }
 
@@ -881,4 +881,4 @@ const rgbToRgba = (rgb: Uint8Array): Uint8Array => {
     view32[i] = rgb[j] | (rgb[j + 1] << 8) | (rgb[j + 2] << 16) | (255 << 24);
   }
   return rgba;
-}
+};
