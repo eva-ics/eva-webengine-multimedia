@@ -1,4 +1,4 @@
-const eva_webengine_multimedia_version = "0.1.4";
+const eva_webengine_multimedia_version = "0.1.5";
 
 import {
   Eva,
@@ -582,6 +582,7 @@ export class EvaRecPlayer {
 }
 
 export enum VideoCodec {
+  Raw = "raw",
   H264 = "avc1.42E01E",
   H265 = "hvc1.1.6.L93.00",
   VP8 = "vp8",
@@ -598,7 +599,7 @@ export interface EvaVideoStreamInfo {
 
 export class EvaVideoDecoder {
   first_key_received: boolean;
-  decoder?: VideoDecoder;
+  decoder?: VideoDecoder | RawDummyDecoder;
   codec?: VideoCodec;
   width?: number;
   height?: number;
@@ -686,7 +687,11 @@ export class EvaVideoDecoder {
       data: frame.data
     });
     try {
-      this.decoder?.decode(chunk);
+      if (this.codec === VideoCodec.Raw) {
+        (this.decoder as RawDummyDecoder).push_raw(frame, timestamp);
+      } else {
+        (this.decoder as VideoDecoder).decode(chunk);
+      }
     } catch (error) {
       try {
         this.decoder?.close();
@@ -716,17 +721,31 @@ export class EvaVideoDecoder {
     try {
       this.decoder?.close();
     } catch (e) {}
-    this.decoder = new VideoDecoder({
-      output: (videoFrame) => {
-        this.onOutput(videoFrame);
-        try {
-          videoFrame.close(); // Close the video frame after processing
-        } catch (e) {}
-      },
-      error: (error) => {
-        this.onError(error);
-      }
-    });
+    if (this.codec == VideoCodec.Raw) {
+      this.decoder = new RawDummyDecoder({
+        output: (videoFrame) => {
+          this.onOutput(videoFrame);
+          try {
+            videoFrame.close(); // Close the video frame after processing
+          } catch (e) {}
+        },
+        error: (error) => {
+          this.onError(error);
+        }
+      });
+    } else {
+      this.decoder = new VideoDecoder({
+        output: (videoFrame) => {
+          this.onOutput(videoFrame);
+          try {
+            videoFrame.close(); // Close the video frame after processing
+          } catch (e) {}
+        },
+        error: (error) => {
+          this.onError(error);
+        }
+      });
+    }
     const config: VideoDecoderConfig = {
       codec: this.codec
     };
@@ -789,6 +808,9 @@ export class EvaVideoFrame {
     }
     this.version = version;
     switch (header[1]) {
+      case 0:
+        this.format = VideoCodec.Raw;
+        break;
       case 10:
         this.format = VideoCodec.H264;
         break;
@@ -813,4 +835,50 @@ export class EvaVideoFrame {
   isKey() {
     return (this.metadata & 0x01) !== 0;
   }
+}
+
+class RawDummyDecoder {
+  private outputCallback: (videoFrame: VideoFrame) => void;
+  private errorCallback: (error: EvaError) => void;
+  constructor(options: {
+    output: (videoFrame: VideoFrame) => void;
+    error: (error: EvaError) => void;
+  }) {
+    this.outputCallback = options.output;
+    this.errorCallback = options.error;
+  }
+  state() {
+    return "configured";
+  }
+  push_raw(frame: EvaVideoFrame, timestamp: number) {
+    try {
+      const videoFrame = new VideoFrame(rgbToRgba(frame.data), {
+        format: "RGBA",
+        codedWidth: frame.width,
+        codedHeight: frame.height,
+        timestamp: timestamp
+      });
+      this.outputCallback(videoFrame);
+    } catch (error) {
+      this.errorCallback(
+        new EvaError(EvaErrorKind.FUNC_FAILED, (error as Error).message)
+      );
+    }
+  }
+  configure(_config: VideoDecoderConfig) {
+    // No-op for raw decoder
+  }
+  close() {
+    // No-op for raw decoder
+  }
+}
+
+const rgbToRgba = (rgb: Uint8Array): Uint8Array => {
+  const len = rgb.length / 3;
+  const rgba = new Uint8Array(len * 4);
+  const view32 = new Uint32Array(rgba.buffer);
+  for (let i = 0, j = 0; i < len; i++, j += 3) {
+    view32[i] = rgb[j] | (rgb[j + 1] << 8) | (rgb[j + 2] << 16) | (255 << 24);
+  }
+  return rgba;
 }
